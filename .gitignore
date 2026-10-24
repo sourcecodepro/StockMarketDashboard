@@ -1,0 +1,27 @@
+# PyCharm project settings
+.idea/
+
+# Python bytecode / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment variables & secrets (API keys, passwords, DB credentials)
+.env
+.env.*
+*.pem
+
+# Database & log files
+*.sqlite3
+*.log
+logs/
+
+# OS-generated files
+.DS_Store
+Thumbs.db

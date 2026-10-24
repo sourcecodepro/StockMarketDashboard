@@ -1,0 +1,22 @@
+sequenceDiagram
+    autonumber
+    actor User
+    participant UI as UI Components (Sidebar / Navbar)
+    participant App as app.py (Master Callback)
+    participant Pipe as Data Pipeline (core/)
+    participant Store as dcc.Store ('session-store')
+    participant Views as Dashboard Tabs (1, 2, 3)
+
+    User->>UI: Select Ticker (e.g., 'AAPL')
+    UI->>App: Trigger Input: sidebar_ticker.value
+    App->>Pipe: Execute Data Fetch & Sanitization Pipeline
+    Pipe-->>App: Return Clean Payload + DHS Metric
+    App->>Store: Write Serialized State (JSON)
+    Store-->>Views: Broadcast State Changed Event
+    
+    par Parallel Render Updates
+        Views->>UI: Update 5-Point Radar Chart
+        Views->>UI: Update Candlestick & EMA/RSI Visuals
+        Views->>UI: Update Executive Insight Banner
+        Views->>UI: Update Data Health Badge (DHS %)
+    end

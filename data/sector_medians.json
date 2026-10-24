@@ -1,0 +1,98 @@
+{
+  "Technology": {
+    "pe_ratio": 28.5,
+    "ps_ratio": 6.2,
+    "ev_ebitda": 20.1,
+    "debt_to_equity": 0.45,
+    "operating_margin": 0.22,
+    "roe": 0.24
+  },
+  "Healthcare": {
+    "pe_ratio": 22.1,
+    "ps_ratio": 4.1,
+    "ev_ebitda": 15.4,
+    "debt_to_equity": 0.60,
+    "operating_margin": 0.16,
+    "roe": 0.15
+  },
+  "Financial Services": {
+    "pe_ratio": 13.8,
+    "ps_ratio": 2.8,
+    "ev_ebitda": 11.2,
+    "debt_to_equity": 1.25,
+    "operating_margin": 0.28,
+    "roe": 0.12
+  },
+  "Consumer Cyclical": {
+    "pe_ratio": 21.4,
+    "ps_ratio": 1.8,
+    "ev_ebitda": 14.0,
+    "debt_to_equity": 0.85,
+    "operating_margin": 0.11,
+    "roe": 0.18
+  },
+  "Communication Services": {
+    "pe_ratio": 19.2,
+    "ps_ratio": 3.1,
+    "ev_ebitda": 12.8,
+    "debt_to_equity": 0.75,
+    "operating_margin": 0.18,
+    "roe": 0.16
+  },
+  "Industrials": {
+    "pe_ratio": 20.5,
+    "ps_ratio": 1.9,
+    "ev_ebitda": 13.5,
+    "debt_to_equity": 0.70,
+    "operating_margin": 0.13,
+    "roe": 0.17
+  },
+  "Consumer Defensive": {
+    "pe_ratio": 23.0,
+    "ps_ratio": 1.5,
+    "ev_ebitda": 15.2,
+    "debt_to_equity": 0.90,
+    "operating_margin": 0.10,
+    "roe": 0.20
+  },
+  "Energy": {
+    "pe_ratio": 11.5,
+    "ps_ratio": 1.2,
+    "ev_ebitda": 6.8,
+    "debt_to_equity": 0.40,
+    "operating_margin": 0.15,
+    "roe": 0.19
+  },
+  "Utilities": {
+    "pe_ratio": 17.5,
+    "ps_ratio": 2.2,
+    "ev_ebitda": 11.0,
+    "debt_to_equity": 1.40,
+    "operating_margin": 0.19,
+    "roe": 0.09
+  },
+  "Real Estate": {
+    "pe_ratio": 32.0,
+    "ps_ratio": 6.8,
+    "ev_ebitda": 18.5,
+    "debt_to_equity": 1.30,
+    "operating_margin": 0.25,
+    "roe": 0.07
+  },
+  "Basic Materials": {
+    "pe_ratio": 15.2,
+    "ps_ratio": 1.4,
+    "ev_ebitda": 8.5,
+    "debt_to_equity": 0.50,
+    "operating_margin": 0.14,
+    "roe": 0.13
+  },
+  "Default": {
+    "pe_ratio": 20.0,
+    "ps_ratio": 2.5,
+    "ev_ebitda": 14.0,
+    "debt_to_equity": 0.75,
+    "operating_margin": 0.15,
+    "roe": 0.15
+  }
+}

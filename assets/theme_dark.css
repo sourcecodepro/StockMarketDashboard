@@ -1,0 +1,120 @@
+:root {
+    --bg-color: #0F172A;
+    --card-bg: #1E293B;
+    --border-color: #334155;
+    --text-primary: #F8FAFC;
+    --text-muted: #94A3B8;
+    --color-bullish: #22C55E;
+    --color-bearish: #EF4444;
+    --color-accent: #38BDF8;
+}
+
+body {
+    background-color: var(--bg-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.card, .executive-card {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.table, .table td, .table th {
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+    background-color: var(--card-bg) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(51, 65, 85, 0.6) !important;
+    color: #FFFFFF !important;
+}
+
+/* Dash DataTable Dark Overrides */
+.dash-spreadsheet-container .dash-spreadsheet-inner th {
+    background-color: #0F172A !important;
+    color: #F8FAFC !important;
+    border: 1px solid #334155 !important;
+}
+
+.dash-spreadsheet-container .dash-spreadsheet-inner td {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+    border: 1px solid #334155 !important;
+}
+
+/* Asset Selection Entry Bar (#ticker-dropdown) Formal Dark Overrides */
+#ticker-dropdown,
+#ticker-dropdown .Select-control,
+#ticker-dropdown div[class*="-control"],
+#ticker-dropdown div[class*="-ValueContainer"] {
+    background-color: #0F172A !important;
+    border-color: #334155 !important;
+    color: #F8FAFC !important;
+}
+
+#ticker-dropdown div[class*="-singleValue"],
+#ticker-dropdown .Select-value-label,
+#ticker-dropdown div[class*="-ValueContainer"] > div {
+    color: #F8FAFC !important;
+    opacity: 1 !important;
+    font-weight: 600 !important;
+}
+
+#ticker-dropdown div[class*="-Input"],
+#ticker-dropdown div[class*="-Input"] input,
+#ticker-dropdown div[class*="-input"] input,
+#ticker-dropdown input {
+    color: #F8FAFC !important;
+    opacity: 1 !important;
+}
+
+#ticker-dropdown div[class*="-placeholder"] {
+    color: #94A3B8 !important;
+    opacity: 0.8 !important;
+}
+
+#ticker-dropdown div[class*="-menu"],
+#ticker-dropdown div[class*="-list"] {
+    background-color: #1E293B !important;
+    border: 1px solid #334155 !important;
+    color: #F8FAFC !important;
+    z-index: 9999 !important;
+}
+
+#ticker-dropdown div[class*="-option"] {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+}
+
+#ticker-dropdown div[class*="-option"]:hover,
+#ticker-dropdown div[class*="-option"][class*="-is-focused"],
+#ticker-dropdown div[class*="-option"][class*="-is-selected"] {
+    background-color: #334155 !important;
+    color: #38BDF8 !important;
+    cursor: pointer !important;
+}
+
+.modal-content {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control, .form-select {
+    background-color: #0F172A !important;
+    border: 1px solid #334155 !important;
+    color: #F8FAFC !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #38BDF8 !important;
+    box-shadow: 0 0 0 0.2rem rgba(56, 189, 248, 0.25) !important;
+    background-color: #0F172A !important;
+    color: #F8FAFC !important;
+}
+
+ul, li {
+    color: var(--text-primary) !important;
+}

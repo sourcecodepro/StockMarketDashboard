@@ -1,0 +1,68 @@
+:root {
+    --bg-color: #F8FAFC;
+    --card-bg: #FFFFFF;
+    --border-color: #E2E8F0;
+    --text-primary: #0F172A;
+    --text-muted: #64748B;
+    --color-bullish: #16A34A;
+    --color-bearish: #DC2626;
+    --color-accent: #0284C7;
+}
+
+body {
+    background-color: var(--bg-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.card, .executive-card {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.table, .table td, .table th {
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+    background-color: var(--card-bg) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(226, 232, 240, 0.6) !important;
+    color: #0F172A !important;
+}
+
+/* Dash DataTable Light Overrides */
+.dash-spreadsheet-container .dash-spreadsheet-inner th {
+    background-color: #F1F5F9 !important;
+    color: #0F172A !important;
+    border: 1px solid #E2E8F0 !important;
+}
+
+.dash-spreadsheet-container .dash-spreadsheet-inner td {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid #E2E8F0 !important;
+}
+
+.modal-content {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control, .form-select {
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    color: #0F172A !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0284C7 !important;
+    box-shadow: 0 0 0 0.2rem rgba(2, 132, 199, 0.25) !important;
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+}
+
+ul, li {
+    color: var(--text-primary) !important;
+}

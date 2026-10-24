@@ -1,0 +1,41 @@
+flowchart TB
+    subgraph Presentation["Presentation Layer (Dash UI / Bootstrap)"]
+        NAV["navbar.py<br>(Theme Engine & Nav)"]
+        SIDE["sidebar.py<br>(Watchlist & CSV Upload)"]
+        T1["tab_market.py<br>(Market Radar & Treemap)"]
+        T2["tab_stock.py<br>(Stock X-Ray & Swing Engine)"]
+        T3["tab_portfolio.py<br>(Portfolio Risk Terminal)"]
+    end
+
+    subgraph State["State Management Layer"]
+        STORE[("dcc.Store<br>('session-store' JSON)")]
+    end
+
+    subgraph Governance["Data Hygiene & Governance Pipeline"]
+        FETCH["data_engine.py<br>(Circuit Breaker Fetcher)"]
+        SCHEMA["schemas.py<br>(Pydantic Contracts)"]
+        SAN["sanitization.py<br>(Domain Imputer)"]
+        TEL["telemetry.py<br>(DHS Calculator & Logging)"]
+    end
+
+    subgraph Analytics["Core Analytics Engines"]
+        TECH["technicals.py<br>(EMA, RSI, MACD)"]
+        FUND["fundamentals.py<br>(Radar Scaling & Peers)"]
+        RISK["risk_engine.py<br>(Beta, Sharpe, Corr)"]
+        INSIGHT["insight_engine.py<br>(Executive Rule Engine)"]
+    end
+
+    subgraph External["Data Infrastructure"]
+        YF[("yfinance API")]
+        FB[("fallback_cache.parquet")]
+        SEC[("sector_medians.json")]
+    end
+
+    NAV & SIDE -->|User Input Event| FETCH
+    FETCH -->|Live Call| YF
+    FETCH -->|On Failure| FB
+    FETCH --> SCHEMA --> SAN
+    SEC --> SAN
+    SAN --> TEL --> Analytics
+    Analytics --> STORE
+    STORE -->|State Changes| T1 & T2 & T3

@@ -1,0 +1,45 @@
+:root {
+    --bg-color: #060606;
+    --card-bg: #121212;
+    --border-color: #00E676;
+    --text-primary: #00E676;
+    --text-muted: #00B0FF;
+    --color-bullish: #00E676;
+    --color-bearish: #FF1744;
+    --color-accent: #00E5FF;
+}
+
+body {
+    background-color: var(--bg-color) !important;
+    color: var(--text-primary) !important;
+    font-family: 'Courier New', Consolas, monospace !important;
+}
+
+.card, .executive-card {
+    background-color: var(--card-bg) !important;
+    border: 1px solid rgba(0, 230, 118, 0.4) !important;
+    box-shadow: 0 0 8px rgba(0, 230, 118, 0.15) !important;
+    color: var(--text-primary) !important;
+}
+
+/* React-Select Entry Bar Input Text Override */
+div[class*="-Input"] input,
+div[class*="-input"] input,
+div[class*="-singleValue"],
+div[class*="-placeholder"] {
+    color: #00E676 !important;
+    font-family: monospace !important;
+}
+
+.modal-content {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control, .form-select {
+    background-color: #060606 !important;
+    border: 1px solid #00E676 !important;
+    color: #00E676 !important;
+    font-family: monospace !important;
+}

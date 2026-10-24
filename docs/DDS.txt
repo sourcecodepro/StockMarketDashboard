@@ -1,0 +1,324 @@
+You are spot on with that critique. Standard Bootstrap `CYBORG` uses neon blue headers and high-contrast gamer styling that can easily look like a trading simulator for kids rather than a tool built for a corporate board or an MBA evaluator. Institutional platforms like **Bloomberg Terminal, Refinitiv Workspace, MSCI, and FactSet** rely on muted, dark-slate charcoal palettes (`#0F172A` / `#161B22`) with subtle, high-clarity typography.
+
+Adding a **Dynamic Theme Engine** with a simple navbar switcher (Formal Dark as the default, Corporate Light for print/daytime reviews, and High-Contrast Terminal) bridges the gap between institutional presentation and evaluator preference.
+
+Here is the complete, re-drafted **Design Document Specification (DDS)** incorporating the dynamic theme system alongside our full data governance and analytical engine.
+
+---
+
+# Design Document Specification (DDS): The Executive Terminal
+
+---
+
+## 1. High-Level Architecture Topology
+
+```text
+ ┌───────────────────────────────────────────────────────────────────────────┐
+ │               Dash UI Layer (Dynamic Theme Stylesheet Link)              │
+ │  ┌─────────────────────────────────────────────────────────────────────┐  │
+ │  │ Theme Engine: [Formal Dark (Default) | Corporate Light | Darkly]    │  │
+ │  └─────────────────────────────────────────────────────────────────────┘  │
+ │  (Navbar, Sidebar Watchlist, Market Radar, Stock X-Ray, Portfolio View)  │
+ └─────────────────────────────────────┬─────────────────────────────────────┘
+                                       │
+                         [Read-Only Render Callbacks]
+                                       │
+                                       ▼
+ ┌───────────────────────────────────────────────────────────────────────────┐
+ │               Central State Engine (dcc.Store: 'session-store')           │
+ │               (Single Source of Truth in Browser Memory)                   │
+ └─────────────────────────────────────▲─────────────────────────────────────┘
+                                       │
+                          [Atomic State Update Callback]
+                                       │
+ ┌───────────────────────────────────────────────────────────────────────────┐
+ │                       Data Hygiene & Pipeline Layer                       │
+ │  ┌─────────────────────────────────────────────────────────────────────┐  │
+ │  │ 1. Schema Contract Validation (Pydantic Models)                     │  │
+ │  ├─────────────────────────────────────────────────────────────────────┤  │
+ │  │ 2. Domain-Aware Imputer (Sector Median, ffill/bfill, Derivations)   │  │
+ │  ├─────────────────────────────────────────────────────────────────────┤  │
+ │  │ 3. Telemetry & Data Health Index (DHS Score Calculator)             │  │
+ │  └─────────────────────────────────────────────────────────────────────┘  │
+ └─────────────────────────────────────▲─────────────────────────────────────┘
+                                       │
+                    ┌──────────────────┴──────────────────┐
+                    │                                     │
+           [Cache Hit / Live API]                  [API Failure]
+                    │                                     │
+                    ▼                                     ▼
+ ┌───────────────────────────────────┐   ┌───────────────────────────────────┐
+ │    yfinance Fetcher + Cache       │   │   Circuit Breaker Fallback Store  │
+ │  (Flask-Caching / Local Memory)   │   │     (Offline Parquet Datasets)    │
+ └───────────────────────────────────┘   └───────────────────────────────────┘
+
+```
+
+---
+
+## 2. Directory & Repository Structure
+
+The project uses a modular enterprise Python package layout managed via `uv`.
+
+```text
+executive-terminal/
+├── .venv/                   # Managed automatically by uv
+├── pyproject.toml           # Deterministic project configuration & dependencies
+├── uv.lock                  # Lockfile for reproducible builds
+├── assets/
+│   ├── custom.css           # Institutional CSS overrides (slate cards, clean borders)
+│   ├── theme_dark.css       # Formal Slate Dark theme rules
+│   ├── theme_light.css      # Corporate Light theme rules
+│   └── favicon.ico          # Application branding
+├── components/              # Modular UI View Functions (Layouts Only)
+│   ├── navbar.py            # Navigation bar & Dynamic Theme Switcher dropdown
+│   ├── sidebar.py           # Watchlist sidebar & asset selection controls
+│   ├── tab_market.py        # Sector treemap, heatmaps & market breadth UI
+│   ├── tab_stock.py         # 5-Point radar chart, technical signals & peer table
+│   └── tab_portfolio.py     # P&L metrics, risk engine & correlation matrix UI
+├── core/                    # Core Business Logic & Pipeline Engine (Pure Python)
+│   ├── data_engine.py       # API fetcher with Circuit Breaker & caching
+│   ├── schemas.py           # Pydantic data contracts (Fundamentals & OHLCV)
+│   ├── sanitization.py      # Domain-aware imputation rules & missing data repair
+│   ├── telemetry.py         # Data Health Score (DHS) calculation & logging engine
+│   ├── technicals.py        # Vectorized EMA, RSI, and MACD indicators
+│   ├── fundamentals.py      # Peer comparison math & radar chart normalization
+│   ├── risk_engine.py       # Portfolio Beta, Sharpe Ratio & correlation math
+│   └── insight_engine.py    # Rule-based executive takeaway generator
+├── data/                    # Persistent storage directory
+│   ├── portfolio.csv        # Default/user transaction log
+│   ├── fallback_cache.parquet # Circuit breaker offline backup dataset
+│   └── sector_medians.json  # Reference valuation benchmarks for imputation
+├── logs/
+│   └── pipeline_telemetry.log # JSON-formatted pipeline sanitization audit logs
+├── app.py                   # Main entry point: Layout assembler & callback binder
+└── README.md                # Production-grade documentation
+
+```
+
+---
+
+## 3. Modular System Architecture & Data Governance Pipeline
+
+### 3.1 Data Contract & Schema Validation (`core/schemas.py`)
+
+Incoming payloads from external endpoints are coerced into strict Pydantic schemas before entering the calculation engines:
+
+* **`MarketDataSchema`**: Enforces strict typing on OHLCV DataFrames. Verifies that `Date` is indexable, volume is non-negative ($\text{Volume} \ge 0$), and `Close` prices are strictly positive floats.
+* **`FundamentalDataSchema`**: Enforces numerical boundaries on financial ratios:
+
+$$\text{P/E} \in [0.0, 1000.0], \quad \text{Debt/Equity} \ge 0.0, \quad \text{ROE} \in [-5.0, 5.0]$$
+
+
+
+### 3.2 Domain-Aware Sanitization & Imputation (`core/sanitization.py`)
+
+To prevent sparse or missing API data from crashing downstream visualizers or mathematical engines, the pipeline applies four deterministic imputation strategies:
+
+1. **Valuation Multiples (P/E, P/S, EV/EBITDA):** Missing attributes are replaced with the pre-calculated median for that stock's industry sector (`data/sector_medians.json`). The field is flagged as `imputed=True`.
+2. **Time-Series Prices (OHLC):** Gaps from non-trading days or missing ticks use Forward-Fill (`ffill`) followed by Backward-Fill (`bfill`) to preserve indicator continuity.
+3. **Derived Ratio Fallbacks:** If composite metrics like Debt-to-Equity are returned as `Null`, the engine dynamically derives them from root balance sheet items:
+
+$$\text{Debt-to-Equity} = \frac{\text{Total Liabilities}}{\text{Total Stockholder Equity}}$$
+
+
+4. **Volume Channels:** Null volume values are filled with `0` to prevent artificial breakout signals in momentum monitors.
+
+### 3.3 Data Health Index & Telemetry (`core/telemetry.py`)
+
+Every data request calculates a **Data Health Score ($DHS$)** to quantify data reliability:
+
+$$DHS = \left( \frac{N_{\text{required}} - N_{\text{imputed}}}{N_{\text{required}}} \right) \times 100$$
+
+* **Health Thresholds:**
+* $DHS \ge 90\%$: **High Quality** (Green Badge in UI)
+* $70\% \le DHS < 90\%$: **Degraded / Sector Imputed** (Yellow Badge in UI)
+* $DHS < 70\%$: **Low Confidence** (Orange Badge + Alert Flag)
+
+
+* **Telemetry Audit:** Imputation events append structured JSON logs to `logs/pipeline_telemetry.log` specifying timestamp, ticker, missing fields, and applied remediation.
+
+### 3.4 Circuit Breaker & API Fetcher (`core/data_engine.py`)
+
+Wraps `yfinance` with an active Circuit Breaker pattern using `Flask-Caching`:
+
+* **Normal Mode:** Fetches live/hourly data; caches responses for $TTL = 3600\text{s}$.
+* **Trip Condition:** Triggers if 3 consecutive requests fail or time out (> 5.0s).
+* **Fallback Mode:** Serves static snapshot data from `data/fallback_cache.parquet` and flags the global system status as `"Offline Mode / Cached Data"`.
+
+---
+
+## 4. Technical & Risk Computation Engines
+
+### 4.1 Technical Momentum Engine (`core/technicals.py`)
+
+Vectorized operations via Pandas and NumPy calculate technical indicators across daily price series:
+
+* **Exponential Moving Averages:**
+
+$$EMA_t = \left( \text{Price}_t \times \left( \frac{2}{N + 1} \right) \right) + \left( EMA_{t-1} \times \left( 1 - \frac{2}{N + 1} \right) \right) \quad \text{for } N \in \{20, 50, 200\}$$
+
+
+* **Relative Strength Index (RSI):** Calculated over a 14-day window:
+
+$$RS = \frac{\text{EMA}_{14}(\text{Gains})}{\text{EMA}_{14}(\text{Losses})}, \quad RSI = 100 - \left( \frac{100}{1 + RS} \right)$$
+
+
+* **MACD Line & Histogram:**
+
+$$\text{MACD} = EMA_{12}(\text{Close}) - EMA_{26}(\text{Close}), \quad \text{Signal} = EMA_9(\text{MACD})$$
+
+
+
+### 4.2 Portfolio & Risk Engine (`core/risk_engine.py`)
+
+* **Portfolio Beta ($\beta_p$):** Weighted systematic risk relative to the market benchmark ($M$):
+
+$$\beta_p = \sum_{i=1}^{K} w_i \cdot \frac{\text{Cov}(R_i, R_M)}{\text{Var}(R_M)}$$
+
+
+* **Annualized Sharpe Ratio ($SR$):** Assumes 252 trading days and risk-free rate $R_f = 4.2\%$:
+
+$$SR = \frac{\bar{R}_p - R_f}{\sigma_p \cdot \sqrt{252}}$$
+
+
+* **Correlation Matrix:** Calculates pairwise Pearson correlation matrix $C_{i,j}$ across holding daily returns.
+
+---
+
+## 5. UI/UX, Theme Engine & Design Tokens
+
+### 5.1 Dynamic Theme Engine Architecture
+
+The application features a built-in **Theme Engine** controlled via a dropdown in `components/navbar.py`. Theme switching dynamically changes the stylesheet link in the DOM (`html.Link(id='theme-stylesheet')`) and adjusts Plotly chart templates (`template='plotly_dark'` vs. `template='plotly_white'`).
+
+| Theme Key | Visual Aesthetic | Target Audience / Use Case | Palette Tokens (Background / Card / Text) |
+| --- | --- | --- | --- |
+| **`FORMAL_DARK`** *(Default)* | Refinitiv / Bloomberg Slate | **MBA Evaluators & Analysts** (Formal corporate dark) | `#0F172A` / `#1E293B` / `#F8FAFC` |
+| **`LIGHT_CORPORATE`** | Executive Briefing / Print Mode | **Boardroom Presentations / Daytime Review** | `#F8FAFC` / `#FFFFFF` / `#0F172A` |
+| **`CYBORG_TERMINAL`** | High-Contrast Dark | **Optional Trading Desk Simulation** | `#060606` / `#121212` / `#00E676` |
+
+### 5.2 Formal Dark Token Palette (Default Theme Specs)
+
+* **Base Background:** `#0F172A` (Deep Slate Charcoal)
+* **Surface Containers / Cards:** `#1E293B` (Muted Slate)
+* **Card Borders:** `#334155` (Subtle 1px border)
+* **Text / Primary Typography:** `#F8FAFC` (Off-White, High Readability)
+* **Text / Muted Typography:** `#94A3B8` (Slate Muted Grey)
+* **Positive Delta / Bullish:** `#22C55E` (Institutional Emerald Green)
+* **Negative Delta / Bearish:** `#EF4444` (Muted Crimson Red)
+* **Accent / Highlight:** `#38BDF8` (Sky Blue)
+
+---
+
+## 6. State Management & Callback Topology
+
+To eliminate circular callback errors, race conditions, and duplicate API requests, the app uses a **Single Source of Truth** pattern anchored by a browser-memory store (`dcc.Store`).
+
+```text
+       ┌───────────────────────────────────────────────────────────────┐
+       │ User Event (Select Ticker OR Toggle Theme Switcher Dropdown)  │
+       └──────────────────────────────┬────────────────────────────────┘
+                                      │
+                     ┌────────────────┴────────────────┐
+                     │                                 │
+            [Ticker Selected]                  [Theme Toggled]
+                     │                                 │
+                     ▼                                 ▼
+ ┌──────────────────────────────────────┐  ┌──────────────────────────────────────┐
+ │ Master Data Callback (app.py)        │  │ Theme Callback (components/navbar.py)│
+ │ 1. Fetch yfinance Data               │  │ 1. Swap CSS Link Href                │
+ │ 2. Run Pydantic Schema Check         │  │ 2. Update Plotly Figure Theme Tokens │
+ │ 3. Execute Imputation & DHS Scoring  │  └──────────────────────────────────────┘
+ │ 4. Calculate Indicators & Risk Math  │
+ └──────────────────┬───────────────────┘
+                    │
+       [Serializes Clean JSON]
+                    │
+                    ▼
+ ┌──────────────────────────────────────┐
+ │    dcc.Store(id='session-store')     │
+ └──────┬───────────────┬───────────────┘
+        │               │
+        ▼               ▼
+ ┌─────────────┐ ┌─────────────┐
+ │ Render      │ │ Render      │
+ │ Charts      │ │ Insights    │
+ └─────────────┘ └─────────────┘
+
+```
+
+---
+
+## 7. Decision Support & Executive Insight Engine (`core/insight_engine.py`)
+
+The insight engine evaluates raw metrics against a deterministic rule matrix to generate automated bullet points:
+
+```python
+# Rule Engine Decision Matrix
+IF RSI < 30 AND Current_Price > EMA_200:
+    FLAG "Oversold Pullback in Secular Uptrend (Potential Swing Entry)"
+ELIF RSI > 70 AND Current_Price < EMA_20:
+    FLAG "Overbought Reversal Danger (Take Profit / Tighten Stops)"
+
+IF Forward_PE < Sector_Median_PE * 0.75 AND Debt_To_Equity < 0.5:
+    FLAG "Fundamentally Undervalued with Strong Balance Sheet"
+
+IF Portfolio_Beta > 1.35:
+    FLAG "High Beta Exposure: Portfolio is highly sensitive to market downturns"
+
+```
+
+* **Export Functionality:** Users can trigger a 1-click **Executive Summary Export**, rendering an inline print-ready HTML modal or downloadable summary of active portfolio metrics and selected stock insights.
+
+---
+
+## 8. Environment Setup & Tooling Specification (`uv`)
+
+### 8.1 Setup Commands
+
+```bash
+# 1. Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. Create virtual environment and install dependencies
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# 3. Add required packages and compile environment
+uv add dash dash-bootstrap-components pandas numpy scipy plotly yfinance pydantic flask-caching pyarrow
+
+# 4. Launch Executive Terminal
+uv run app.py
+
+```
+
+### 8.2 Dependency Contract (`pyproject.toml`)
+
+```toml
+[project]
+name = "executive-terminal"
+version = "1.0.0"
+description = "Institutional Stock Analytics & Portfolio Intelligence Platform"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dash>=2.14.0",
+    "dash-bootstrap-components>=1.5.0",
+    "pandas>=2.1.0",
+    "numpy>=1.26.0",
+    "scipy>=1.11.0",
+    "plotly>=5.18.0",
+    "yfinance>=0.2.35",
+    "pydantic>=2.5.0",
+    "flask-caching>=2.1.0",
+    "pyarrow>=14.0.0",
+]
+
+```
+
+---
+
+This revised DDS gives us a slate dark theme that looks like Bloomberg/Refinitiv, plus a theme switcher so your evaluator can view it in whatever aesthetic they prefer.
+
+Whenever you're ready to start building, tell me which module to generate first (`pyproject.toml`, `core/data_engine.py`, or `app.py`).

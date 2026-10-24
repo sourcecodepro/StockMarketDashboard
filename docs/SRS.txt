@@ -1,0 +1,88 @@
+# System Requirements Specification (SRS): "The Executive Terminal"
+
+---
+
+## 1. Project Scope & Target Personas
+
+The system is a business intelligence stock market analytics platform designed to bridge institutional corporate valuation with short-to-medium term technical swing trading intelligence.
+
+### Supported Personas
+
+* **The Executive / MBA Evaluator:** Requires capital allocation visibility, industry multiple benchmarks (P/E, EV/EBITDA, ROE), risk-adjusted metrics, and automated decision-support summaries.
+* **The Portfolio Manager:** Requires real-time/cached tracking of capital invested vs. current asset valuation, realized/unrealized P&L, sector concentration, and correlation risk.
+* **The Positional / Swing Trader:** Requires multi-timeframe moving average signals, RSI momentum thresholds, MACD histogram reversals, and volume anomaly detection on daily/hourly intervals.
+
+---
+
+## 2. Functional Requirements (FR)
+
+### Module 1: Market & Sector Radar
+
+* **FR-1.1 (Market Heatmap):** Render an interactive hierarchical treemap of index constituents (e.g., S&P 500 / Nifty 50), where tile area represents Market Capitalization and tile color signifies percentage performance across selectable windows (1D, 1W, 1M).
+* **FR-1.2 (Sector Rotation Matrix):** Display a multi-period heatmap tracking sector performance over 1D, 1M, 6M, and YTD to identify institutional capital flows.
+* **FR-1.3 (Market Breadth Gauge):** Calculate and render Advance/Decline ratios, 52-week High/Low distribution counts, and stocks exhibiting volume anomalies (>200% of 20-day average volume).
+
+### Module 2: Stock X-Ray & Swing Engine
+
+* **FR-2.1 (5-Point Fundamental Radar):** Generate a normalized 5-axis spider chart for any queried asset, scoring:
+1. *Valuation:* P/E relative to industry median.
+2. *Growth:* YoY Revenue & Net Income growth.
+3. *Financial Health:* Debt-to-Equity ratio & Current Ratio.
+4. *Dividends:* Dividend Yield & Payout Ratio safety.
+5. *Momentum:* Weighted 14-day RSI and 20-day EMA slope score.
+
+
+* **FR-2.2 (Technical Signal Matrix):** Compute short-term and medium-term technical indicators using `yfinance` daily candle data:
+* 20-day, 50-day, and 200-day Exponential Moving Averages (EMA) with Golden/Death Cross alerts.
+* 14-period Relative Strength Index (RSI) with overbought (>70) and oversold (<30) triggers.
+* Moving Average Convergence Divergence (MACD) line vs. Signal line crossovers.
+
+
+* **FR-2.3 (Peer Valuation Matrix):** Automatically generate a comparative table comparing the selected stock against top 3 industry peers across P/E, P/S, EV/EBITDA, Operating Margin %, and Return on Equity (ROE %).
+
+### Module 3: Portfolio Holdings & Risk Terminal
+
+* **FR-3.1 (P&L Engine):** Calculate total invested capital, current market value, total unrealized P&L ($ and %), and daily return tracking based on user-provided transaction logs.
+* **FR-3.2 (Benchmark Performance Tracking):** Overlay cumulative portfolio growth against a baseline index (S&P 500 or Nifty 50) on a time-series line chart.
+* **FR-3.3 (Risk & Correlation Engine):** Compute portfolio-level risk metrics:
+* **Portfolio Beta ($\beta_p$):** Weighted systematic risk relative to the market index.
+* **Sharpe Ratio ($SR$):** Risk-adjusted return calculation using annualized risk-free rate ($R_f$):
+
+$$SR = \frac{R_p - R_f}{\sigma_p}$$
+
+
+* **Asset Correlation Matrix:** Cross-asset Pearson correlation heatmap to flag over-concentration risks.
+
+
+
+### Module 4: Ingestion & Data Persistence
+
+* **FR-4.1 (Portfolio Import):** Provide dual input channels:
+1. File upload parser for standard `transactions.csv` (schema: `Ticker, Buy_Date, Quantity, Buy_Price`).
+2. In-app manual entry/editing interface with client-side validation.
+
+
+* **FR-4.2 (Data Fetching & Caching):** Pull historical end-of-day prices, fundamentals, and sector metadata via `yfinance`. Persist responses to a local cache (SQLite or Parquet) with a default 1-hour TTL (Time-To-Live) to eliminate redundant external calls.
+
+### Module 5: Decision Support & Executive Reporting
+
+* **FR-5.1 (Rule-Based Insights Generator):** Automatically parse combined technical and fundamental data to produce 3–5 bullet points summarizing stock status (e.g., *"Stock is fundamentally undervalued (P/E 12 vs. Industry 18), but technical momentum is oversold (RSI 28) beneath the 50-day EMA."*).
+* **FR-5.2 (Executive Summary Export):** Generate a 1-click formatted summary output (PDF download or clean print-friendly layout) containing portfolio health, top risk exposure, and actionable stock setups.
+
+---
+
+## 3. Non-Functional Requirements (NFR)
+
+| ID | Category | Requirement Specification |
+| --- | --- | --- |
+| **NFR-1** | **Latency & Performance** | Dashboard initial cold start must complete within $\le 3$ seconds. Tab transitions and ticker changes must render within $\le 1$ second using cached data. |
+| **NFR-2** | **Resilience & Fault Tolerance** | Invalid ticker entries or network dropouts during `yfinance` fetches must gracefully default to cached data or show non-blocking warning banners. |
+| **NFR-3** | **UI/UX & Aesthetics** | Dark-mode interface inspired by Zerodha Kite / Dhan, utilizing strict visual hierarchy, green/red status indicators, and compact micro-cards. |
+| **NFR-4** | **Data Integrity** | Portfolio metrics must update deterministically upon updating transaction inputs without page reloads. |
+| **NFR-5** | **Portability** | Zero reliance on paid third-party API keys or dedicated backend servers; executable entirely within a local Python virtual environment. |
+
+---
+
+## 4. Requirements Baseline Freeze
+
+This requirements baseline locks the functional boundary for the Executive Terminal. We can now transition to evaluating tech stacks, framework trade-offs, and system architecture.

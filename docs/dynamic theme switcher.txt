@@ -1,0 +1,12 @@
+flowchart TD
+    A[User Selects Theme in Dropdown<br>navbar.py] --> B{Selected Theme Key}
+
+    B -- FORMAL_DARK (Default) --> C1[Load assets/theme_dark.css]
+    B -- LIGHT_CORPORATE --> C2[Load assets/theme_light.css]
+    B -- CYBORG_TERMINAL --> C3[Load dash-bootstrap Cyborg CSS]
+
+    C1 --> D1[Set Plotly Palette Tokens<br>Template: plotly_dark<br>Bg: #0F172A | Card: #1E293B]
+    C2 --> D2[Set Plotly Palette Tokens<br>Template: plotly_white<br>Bg: #F8FAFC | Card: #FFFFFF]
+    C3 --> D3[Set Plotly Palette Tokens<br>Template: plotly_dark<br>Bg: #060606 | Card: #121212]
+
+    D1 & D2 & D3 --> E[DOM Update: Swap Stylesheet Link & Re-render Figures]

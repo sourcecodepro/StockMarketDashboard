@@ -1,0 +1,22 @@
+flowchart TD
+    A[Raw Payload from yfinance] --> B{Circuit Breaker Status}
+    
+    B -- Normal / Online --> C[Pydantic Schema Contract<br>schemas.py]
+    B -- Tripped / Offline --> D[Load Parquet Backup<br>fallback_cache.parquet]
+
+    C --> E{Schema Validation}
+    E -- Pass (100% Complete) --> F[Clean Metric Stream]
+    E -- Fail / Missing Rows --> G[Sanitization Engine<br>sanitization.py]
+
+    G --> H1[Valuation Multiples:<br>Sector Median Imputation]
+    G --> H2[OHLC Time-Series:<br>Forward-Fill -> Backward-Fill]
+    G --> H3[Balance Sheet:<br>Dynamic Ratio Derivation]
+
+    H1 & H2 & H3 --> I[Telemetry Engine<br>telemetry.py]
+    F --> I
+    D --> I
+
+    I --> J[Compute Data Health Score DHS]
+    I --> K[Write Audit Entry<br>pipeline_telemetry.log]
+
+    J & K --> L[Output Validated Payload to dcc.Store]

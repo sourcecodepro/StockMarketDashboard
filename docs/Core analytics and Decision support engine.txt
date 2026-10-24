@@ -1,0 +1,26 @@
+flowchart LR
+    subgraph DataInputs["Clean Data Stream"]
+        OHLCV["OHLCV Price DataFrame"]
+        FUND_METRICS["Fundamental Metrics & Multiples"]
+        PORT_LOG["User Portfolio CSV"]
+    end
+
+    subgraph CalculationModules["Core Processing Modules"]
+        direction TB
+        T_ENG["technicals.py<br>• EMA 20/50/200<br>• RSI (14-Period)<br>• MACD & Signal Line"]
+        F_ENG["fundamentals.py<br>• 5-Axis Scale Normalization<br>• Peer Comparison Matrix"]
+        R_ENG["risk_engine.py<br>• Weighted Portfolio Beta<br>• Annualized Sharpe Ratio<br>• Pearson Correlation Matrix"]
+        I_ENG["insight_engine.py<br>• Technical & Fundamental<br>Rule Matrix Evaluation"]
+    end
+
+    subgraph VisualOutputs["Rendered Components"]
+        T_OUT["Interactive Candlestick & Momentum Charts"]
+        F_OUT["5-Point Spider Chart & Peer Table"]
+        R_OUT["Risk Heatmap & P&L Summary Cards"]
+        I_OUT["Executive Takeaway Bullet Points"]
+    end
+
+    OHLCV --> T_ENG --> T_OUT
+    FUND_METRICS --> F_ENG --> F_OUT
+    PORT_LOG & OHLCV --> R_ENG --> R_OUT
+    T_ENG & F_ENG & R_ENG --> I_ENG --> I_OUT
